@@ -1,6 +1,7 @@
 /**  */
 package com.jasonzhou.tool.sag.info;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +48,7 @@ public class ExcelInputFile {
 	 * @throws IOException
 	 */
 	private static List<Sheet> getTargetSheets(Config config, Task task) throws IOException {
-		Workbook book = ExcelUtils.load(task.getInputFile());
+		Workbook book = ExcelUtils.load(new FileInputStream(task.getInputFile()));
 		List<Sheet> list = new ArrayList<>();
 		String targetText = config.getVar(TARGET_TEXT);
 		//targetText未定義
