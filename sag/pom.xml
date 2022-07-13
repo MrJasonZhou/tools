@@ -39,6 +39,11 @@
 		    <groupId>org.apache.commons</groupId>
 		    <artifactId>commons-lang3</artifactId>
 		</dependency>
+		<dependency>
+		    <groupId>org.apache.tomcat</groupId>
+		    <artifactId>tomcat-jasper</artifactId>
+		    <version>10.0.22</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
