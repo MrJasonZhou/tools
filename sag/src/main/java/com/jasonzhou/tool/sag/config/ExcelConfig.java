@@ -1,5 +1,6 @@
 package com.jasonzhou.tool.sag.config;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -63,7 +64,7 @@ public class ExcelConfig extends Config {
 	 */
 	@Override
 	public void load(String fileName) throws IOException {
-		Workbook book = ExcelUtils.load(fileName);
+		Workbook book = ExcelUtils.load(new FileInputStream(fileName));
 		//設定情報（グローバル変数）を取得する
 		loadGlobalVars(book.getSheet(SHEET_CONFIG));
 		//区分値

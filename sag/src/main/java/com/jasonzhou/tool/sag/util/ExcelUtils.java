@@ -3,6 +3,7 @@ package com.jasonzhou.tool.sag.util;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -89,7 +90,7 @@ public class ExcelUtils {
 	 * @return	Excelファイル
 	 * @throws IOException 
 	 */
-	public static Workbook  load(String fileName) throws  IOException {
+	private static Workbook load(String fileName) throws  IOException {
 
         FileInputStream is =  new FileInputStream(fileName);
         if (fileName.toLowerCase().endsWith("xlsx") || fileName.toLowerCase().endsWith("xlsm")) {
@@ -106,6 +107,19 @@ public class ExcelUtils {
         }
 	}
 	
+	/**
+	 * 設定ファイルを読み込む
+	 * 
+	 * @param fileName	ファイル名
+	 * @return	Excelファイル
+	 * @throws IOException 
+	 */
+	public static Workbook  load(InputStream is) throws  IOException {
+
+    	Workbook book = new XSSFWorkbook(is); 
+    	mapFormulaEvaluator.put(book, new XSSFFormulaEvaluator((XSSFWorkbook) book));
+        return book;
+	}	
 	/**
 	 * セルのテキスト情報を取得する
 	 * 

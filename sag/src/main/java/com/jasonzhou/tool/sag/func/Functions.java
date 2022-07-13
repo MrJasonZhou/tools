@@ -1,4 +1,7 @@
-/**  */
+/**
+ * 関数操作クラス 
+ *
+ */
 package com.jasonzhou.tool.sag.func;
 
 import java.util.ArrayList;
