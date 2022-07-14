@@ -154,7 +154,7 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C>  {
 		return t;
 	}
 
-	private <T extends ListableProperty<?>> T readList(Sheet sheet, Config config, T t)  throws Exception {
+	private <E, T extends ListableProperty<E>> T readList(Sheet sheet, Config config, T t)  throws Exception {
 		//レイアウトを取得する
 		List<VarDefine> vdList = parseLayout(sheet, checkList);
 		if (vdList == null || vdList.isEmpty()) {
@@ -169,14 +169,16 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C>  {
 			//属性インスタンスを作成する
 			Object bean = t.newElement();
 			for(VarDefine vd : vdList) {
-				String propertyName = vd.getVarName();
+				//先頭の「:」を取り除く
+				String propertyName = StringUtils.substring(vd.getVarName(), 1);
 				String text = ExcelUtils.getCellText(sheet, rowNo, vd.getPosistion().getCol());
 				if (StringUtils.isNotBlank(propertyName)) {
 					//値を設定する
 					SagUtil.set(bean, propertyName, text);
 				}
 			}
-			t.add(bean);
+			
+			t.add((E)bean);
 			rowNo++;
 		}
 		return t;

@@ -19,7 +19,7 @@ public interface ListableProperty<T> extends Serializable, SimpleProperty {
 	 * 
 	 * @param t	属性
 	 */
-	public void add(Object t);
+	public void add(T t);
 	
 	/**
 	 * 属性のリストを取得する
@@ -41,4 +41,5 @@ public interface ListableProperty<T> extends Serializable, SimpleProperty {
 	 * @return	属性クラス
 	 */
 	public Class<T> elementClass();
+	
 }

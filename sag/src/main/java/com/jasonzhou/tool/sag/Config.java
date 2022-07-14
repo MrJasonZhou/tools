@@ -3,6 +3,7 @@
  */
 package com.jasonzhou.tool.sag;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,8 +13,11 @@ import java.util.Map;
  * @author Jason Zhou
  *
  */
-public class Config {
+public class Config implements Serializable{
 
+	/**  */
+	private static final long serialVersionUID = 5352599845177998046L;
+	
 	private Map<String, String> properties = new HashMap<>();
 	
 	/**
