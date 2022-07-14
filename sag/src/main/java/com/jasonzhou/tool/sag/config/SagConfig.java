@@ -17,6 +17,6 @@ public class SagConfig extends Config {
 	
     private static Logger logger = LoggerFactory.getLogger(SagConfig.class);
 	
-	private Task task = new Task();
+	
     
 }

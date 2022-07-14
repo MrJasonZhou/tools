@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import com.jasonzhou.tool.sag.Config;
 import com.jasonzhou.tool.sag.ConfigReader;
 import com.jasonzhou.tool.sag.config.ListableProperty;
-import com.jasonzhou.tool.sag.config.SagConfig;
 import com.jasonzhou.tool.sag.config.SimpleProperty;
 import com.jasonzhou.tool.sag.info.Position;
 import com.jasonzhou.tool.sag.info.VarDefine;
@@ -32,7 +31,7 @@ import com.jasonzhou.tool.sag.util.SagUtil;
  * @author Jason Zhou
  *
  */
-public class ExcelConfigReader extends ConfigReader<SagConfig> {
+public class ExcelConfigReader<C extends Config> extends ConfigReader<C>  {
 
     private static Logger logger = LoggerFactory.getLogger(ExcelConfigReader.class);
 	/** シート：設定情報（グローバル変数） */
@@ -46,9 +45,9 @@ public class ExcelConfigReader extends ConfigReader<SagConfig> {
 	private static final String PROPERTY_DEFINE_SHEETS = "define.sheets";
 	
 	@Override
-	public SagConfig load(InputStream is) throws Exception {
+	public C load(InputStream is, Class<C> cClass) throws Exception {
 		Workbook book = null;
-		SagConfig config = new SagConfig();
+		C config = cClass.getDeclaredConstructor().newInstance();
 		try {
 			book = ExcelUtils.load(is);
 			//最初の
@@ -56,6 +55,7 @@ public class ExcelConfigReader extends ConfigReader<SagConfig> {
 			loadProperties(propertySheet, config);
 			//対象シート
 			for (String sheetName : StringUtils.split(config.getProperty(PROPERTY_DEFINE_SHEETS), ",")) {
+				sheetName = StringUtils.trim(sheetName);
 				Sheet sheet = book.getSheet(sheetName);
 				if (sheet == null) {
 					String msg = "シートを見つかりませんでした。シート名＝" + sheetName;
@@ -67,7 +67,8 @@ public class ExcelConfigReader extends ConfigReader<SagConfig> {
 					try {
 						Class<?> cls = Class.forName(clsName);
 						Object define=read(sheet, config, cls);
-						config.setDefine(sheetName, define);
+						SagUtil.set(config, sheetName, define);
+						//config.setDefine(sheetName, define);
 					}catch (Exception e) {
 						logger.error("クラスロード中エラーが発生しました。クラス名＝" + clsName, e);
 					}
