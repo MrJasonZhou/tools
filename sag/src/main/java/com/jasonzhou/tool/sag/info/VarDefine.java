@@ -115,33 +115,12 @@ public class VarDefine {
 	 * 変数定義を取得する
 	 * 
 	 * @param pos		位置情報
-	 * @param defineText	定義文字列（[区分]:[型] 変数名）
+	 * @param name	 	変数名
 	 * @return	変数定義
 	 */
-	public static VarDefine create(Position pos, String defineText) {
+	public static VarDefine create(Position pos, String name) {
 		VarDefine vd = new VarDefine();
 		vd.setPosistion(pos);
-		//必須フラグ
-		if (StringUtils.startsWith(defineText, "*")) {
-			vd.required = true;
-			defineText = StringUtils.substring(defineText, 1);
-		}
-		String[] arr1 = StringUtils.split(defineText, ":");
-		//デフォルト区分＝グローバル
-		vd.setKbn(VarKbn.GLOBAL);
-		if (arr1.length >= 2) {
-			vd.setKbn(VarKbn.as(arr1[0]));
-			//defineText = arr1[1];
-		}
-		arr1 = StringUtils.split(defineText);
-		String name ;
-		//デフォルト型：文字列
-		if (arr1.length < 2) {
-			vd.setType(VarType.STRING);
-			name = arr1[0];
-		} else {
-			name = arr1[1];
-		}
 		//変数名
 		vd.setVarName(name);
 		return vd;

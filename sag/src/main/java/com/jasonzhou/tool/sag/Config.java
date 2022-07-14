@@ -3,6 +3,7 @@
  */
 package com.jasonzhou.tool.sag;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,11 +13,12 @@ import java.util.Map;
  * @author Jason Zhou
  *
  */
-public class Config {
+public class Config implements Serializable{
 
-	private Map<String, String> properties = new HashMap<>();
+	/**  */
+	private static final long serialVersionUID = 5352599845177998046L;
 	
-	private Map<String, Object> defines = new HashMap<>();
+	private Map<String, String> properties = new HashMap<>();
 	
 	/**
 	 * 属性を設定する
@@ -38,29 +40,29 @@ public class Config {
 		return properties.get(key);
 	}
 	
-	/**
-	 * 定義情報を取得する
-	 * 
-	 * @param name	定義名			
-	 * @param tClass	定義情報クラス
-	 * @return	定義情報
-	 */
-	public <T> T getDefine(String name, Class<T> tClass) {
-		Object obj = defines.get(name);
-		if (tClass.isAssignableFrom(obj.getClass())) {
-			return (T) obj;
-		}
-		return null;
-	}
-	
-	/**
-	 * 定義情報を設定する
-	 * 
-	 * @param <T>	定義情報クラス
-	 * @param name	定義名
-	 * @param define	定義情報
-	 */
-	public <T> void setDefine(String name, T define) {
-		defines.put(name, define);
-	}
+//	/**
+//	 * 定義情報を取得する
+//	 * 
+//	 * @param name	定義名			
+//	 * @param tClass	定義情報クラス
+//	 * @return	定義情報
+//	 */
+//	public <T> T getDefine(String name, Class<T> tClass) {
+//		Object obj = defines.get(name);
+//		if (tClass.isAssignableFrom(obj.getClass())) {
+//			return (T) obj;
+//		}
+//		return null;
+//	}
+//	
+//	/**
+//	 * 定義情報を設定する
+//	 * 
+//	 * @param <T>	定義情報クラス
+//	 * @param name	定義名
+//	 * @param define	定義情報
+//	 */
+//	public <T> void setDefine(String name, T define) {
+//		defines.put(name, define);
+//	}
 }

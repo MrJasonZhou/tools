@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * コンバートUtil
+ * Util
  * 
  * @author 周
  *
