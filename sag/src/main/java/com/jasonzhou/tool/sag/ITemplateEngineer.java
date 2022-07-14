@@ -20,4 +20,13 @@ public interface ITemplateEngineer {
 	 * @throws Exception
 	 */
 	public void execute(Config config) throws Exception;
+	
+	/**
+	 * 式を評価する
+	 * 
+	 * @param express	式
+	 * @return	評価結果
+	 * @throws Exception
+	 */
+	public Object eval(String express) throws Exception;
 }
