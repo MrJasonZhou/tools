@@ -11,7 +11,7 @@ import java.io.InputStream;
  * @author Jason Zhou
  *
  */
-public abstract class ConfigReader {
+public abstract class ConfigReader<T extends Config> {
 
 	/**
 	 * 設定情報をロードする
@@ -20,5 +20,5 @@ public abstract class ConfigReader {
 	 * @return	設定情報
 	 * @throws Exception
 	 */
-	public abstract Config load(InputStream is) throws Exception;
+	public abstract T load(InputStream is) throws Exception;
 }

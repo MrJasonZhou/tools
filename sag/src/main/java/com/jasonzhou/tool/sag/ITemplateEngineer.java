@@ -3,8 +3,6 @@
  */
 package com.jasonzhou.tool.sag;
 
-import com.jasonzhou.tool.sag.config.Config;
-
 /**
  * テンプレートエンジンのインタフェース
  * 

@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -20,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.jasonzhou.tool.sag.Config;
 import com.jasonzhou.tool.sag.ConfigReader;
 import com.jasonzhou.tool.sag.config.ListableProperty;
+import com.jasonzhou.tool.sag.config.SagConfig;
 import com.jasonzhou.tool.sag.config.SimpleProperty;
 import com.jasonzhou.tool.sag.info.Position;
 import com.jasonzhou.tool.sag.info.VarDefine;
@@ -32,7 +32,7 @@ import com.jasonzhou.tool.sag.util.SagUtil;
  * @author Jason Zhou
  *
  */
-public class ExcelConfigReader extends ConfigReader {
+public class ExcelConfigReader extends ConfigReader<SagConfig> {
 
     private static Logger logger = LoggerFactory.getLogger(ExcelConfigReader.class);
 	/** シート：設定情報（グローバル変数） */
@@ -46,9 +46,9 @@ public class ExcelConfigReader extends ConfigReader {
 	private static final String PROPERTY_DEFINE_SHEETS = "define.sheets";
 	
 	@Override
-	public Config load(InputStream is) throws Exception {
+	public SagConfig load(InputStream is) throws Exception {
 		Workbook book = null;
-		Config config = new Config();
+		SagConfig config = new SagConfig();
 		try {
 			book = ExcelUtils.load(is);
 			//最初の
