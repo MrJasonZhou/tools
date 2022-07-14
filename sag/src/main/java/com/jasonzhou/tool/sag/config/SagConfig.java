@@ -15,7 +15,9 @@ import com.jasonzhou.tool.sag.Config;
 @Component
 public class SagConfig extends Config {
 	
-    private static Logger logger = LoggerFactory.getLogger(SagConfig.class);
+	private static final long serialVersionUID = 7598966952267494700L;
+
+	private static Logger logger = LoggerFactory.getLogger(SagConfig.class);
 	
 	/** タスク情報 */
 	private Tasks tasks ;
