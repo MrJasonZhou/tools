@@ -6,7 +6,9 @@ package com.jasonzhou.tool.sag.excel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -43,6 +45,8 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C>  {
 	 * 設定情報：属性　定義対象シート
 	 */
 	private static final String PROPERTY_DEFINE_SHEETS = "define.sheets";
+	
+	private Map<String, List<VarDefine>> varMap = new HashMap<>();
 	
 	@Override
 	public C load(InputStream is, Class<C> cClass) throws Exception {
@@ -135,6 +139,7 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C>  {
 		if (vdList == null || vdList.isEmpty()) {
 			return t;
 		}
+		varMap.put(sheet.getSheetName() + ":simple", vdList);
 		//行番号
 		int rowNo = vdList.get(0).getPosistion().getRow() + 1;
 		//列番号
@@ -160,6 +165,7 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C>  {
 		if (vdList == null || vdList.isEmpty()) {
 			return t;
 		}
+		varMap.put(sheet.getSheetName() + ":list", vdList);
 		//行番号
 		int rowNo = vdList.get(0).getPosistion().getRow() + 1;
 		//列番号
