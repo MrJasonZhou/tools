@@ -6,7 +6,9 @@ package com.jasonzhou.tool.sag.excel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -43,6 +45,8 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C>  {
 	 * 設定情報：属性　定義対象シート
 	 */
 	private static final String PROPERTY_DEFINE_SHEETS = "define.sheets";
+	
+	private Map<String, List<VarDefine>> varMap = new HashMap<>();
 	
 	@Override
 	public C load(InputStream is, Class<C> cClass) throws Exception {
@@ -129,18 +133,48 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C>  {
 		return t;
 	}
 
+	private IExcelRowChecker defaultRowCheck = (config, sheet, rowNo,vdList) -> {
+		return StringUtils.isBlank(ExcelUtils.getCellText(sheet, rowNo, vdList.get(0).getPosistion().getCol()));
+	};
+	
+	
+	/**
+	 * 行は処理対象であるかを判断するチェッカーを取得する
+	 * 
+	 * @param config	設定情報
+	 * @param sheet		対象となるシート
+	 * @return	行は処理対象であるかを判断するチェッカー
+	 */
+	private IExcelRowChecker getRowChecker(Config config, Sheet sheet) {
+		String checkerClassName = config.getProperty(sheet.getSheetName() + ".rowChecker");
+		IExcelRowChecker rowChecker = null;
+		if (StringUtils.isBlank(checkerClassName)) {
+			rowChecker = defaultRowCheck;
+		} else {
+			try {
+				Class<IExcelRowChecker> clz = (Class<IExcelRowChecker>)Class.forName(checkerClassName);
+				rowChecker = clz.getDeclaredConstructor().newInstance();
+			}catch(Exception e) {
+				logger.warn("RowCheckeロード時エラーが発生しました。", e);
+				rowChecker = defaultRowCheck;
+			}
+		}
+		return rowChecker;
+	}
 	private <T extends SimpleProperty> T readSimple(Sheet sheet, Config config, T t)  throws Exception {
 		//レイアウトを取得する
 		List<VarDefine> vdList = parseLayout(sheet, checkSimple);
 		if (vdList == null || vdList.isEmpty()) {
 			return t;
 		}
+		varMap.put(sheet.getSheetName() + ":simple", vdList);
 		//行番号
 		int rowNo = vdList.get(0).getPosistion().getRow() + 1;
-		//列番号
-		int colNo = vdList.get(0).getPosistion().getCol();
-		//先頭列はNULLじゃない場合
-		while(!ExcelUtils.isBlank(sheet, rowNo, colNo)) {
+		//行は処理対象であるかを判断するチェッカーを取得する
+		IExcelRowChecker rowChecker = getRowChecker(config, sheet);
+		
+		//行は対象であるかを判断する
+		while(rowChecker.check(config, sheet, rowNo, vdList)) {
 			for(VarDefine vd : vdList) {
 				String propertyName = vd.getVarName();
 				String text = ExcelUtils.getCellText(sheet, rowNo, vd.getPosistion().getCol());
@@ -160,12 +194,13 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C>  {
 		if (vdList == null || vdList.isEmpty()) {
 			return t;
 		}
+		varMap.put(sheet.getSheetName() + ":list", vdList);
 		//行番号
 		int rowNo = vdList.get(0).getPosistion().getRow() + 1;
-		//列番号
-		int colNo = vdList.get(0).getPosistion().getCol();
-		//先頭列はNULLじゃない場合
-		while(!ExcelUtils.isBlank(sheet, rowNo, colNo)) {
+		//行は処理対象であるかを判断するチェッカーを取得する
+		IExcelRowChecker rowChecker = getRowChecker(config, sheet);
+		//行は対象であるかを判断する
+		while(rowChecker.check(config, sheet, rowNo, vdList)) {
 			//属性インスタンスを作成する
 			Object bean = t.newElement();
 			for(VarDefine vd : vdList) {

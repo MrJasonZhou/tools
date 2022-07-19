@@ -238,18 +238,6 @@ public class ExcelUtils {
 	}
 	
 	/**
-	 * セルのテキスト情報を取得する
-	 * 
-	 * @param sheet	シート
-	 * @param rowNo		行番号
-	 * @param colNo		列番号
-	 * @return	テキスト情報
-	 */
-	public static String getCellText(Sheet sheet, int rowNo, int colNo) {
-		return getCellText(getCell(sheet, rowNo, colNo));
-	}
-
-	/**
 	 * セルのコメント情報を取得する
 	 * 
 	 * @param sheet	シート
@@ -296,6 +284,35 @@ public class ExcelUtils {
 	     return df.formatCellValue(cell);
 	}
 
+	/**
+	 * セルのテキスト情報を取得する
+	 * 
+	 * @param row	行
+	 * @param colNo	列番号
+	 * @return	セルのテキスト情報
+	 */
+	public static String getCellText(Row row, int colNo) {
+		if (colNo > row.getLastCellNum()) {
+			return "";
+		}
+		return getCellText(row.getCell(colNo));
+	}
+	
+	/**
+	 * セルのテキスト情報を取得する
+	 * 
+	 * @param sheet シート
+	 * @param rowNo	行番号
+	 * @param colNo	列番号
+	 * @return	セルのテキスト情報
+	 */
+	public static String getCellText(Sheet sheet, int rowNo, int colNo) {
+		if (rowNo < sheet.getFirstRowNum() || rowNo > sheet.getLastRowNum()) {
+			return "";
+		}
+		return getCellText(sheet.getRow(rowNo), colNo);
+	}
+	
 	/**
 	 * セルのテキスト情報を設定する
 	 * 
