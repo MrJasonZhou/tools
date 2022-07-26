@@ -1,8 +1,6 @@
 /**  */
 package com.jasonzhou.tool.sag.info;
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * 変数定義情報
  * 
