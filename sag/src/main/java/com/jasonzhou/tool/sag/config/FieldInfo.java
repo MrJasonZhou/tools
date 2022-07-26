@@ -7,6 +7,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * 項目情報
  * 
@@ -15,6 +17,7 @@ import java.util.List;
  */
 public class FieldInfo implements Serializable {
 
+	private int index = 0;
 	/**  */
 	private static final long serialVersionUID = 1695007824542641409L;
 
@@ -28,16 +31,16 @@ public class FieldInfo implements Serializable {
 	private String type;
 	
 	/** 項目レングス */
-	private int length;
+	private String lengthText;
 	
 	/** 項目小数点以下桁数 */
-	private int decimal;
-	
+	private String decimalText;
+
 	/** 項目はNULL可能か */
-	private Boolean nullable;
+	private String nullableText;
 	
 	/** 項目は主キーの一部か */
-	private Boolean pk;
+	private String pkText;
 	
 	/** 項目はインデックス対象の場合インデックス番号リスト */
 	private List<String> indexNo = new ArrayList<>();
@@ -102,16 +105,20 @@ public class FieldInfo implements Serializable {
 	 * @return 項目レングス
 	 */
 	public int getLength() {
-		return length;
+		if (StringUtils.isNumeric(lengthText)) {
+			return Integer.parseInt(lengthText);
+		} else {
+			return 0;
+		}
 	}
 
 	/**
 	 * 項目レングス を設定する
 	 *
-	 * @param length 項目レングス
+	 * @param lengthText 項目レングス
 	 */
-	public void setLength(int length) {
-		this.length = length;
+	public void setLength(String lengthText) {
+		this.lengthText = lengthText;
 	}
 
 	/**
@@ -120,16 +127,20 @@ public class FieldInfo implements Serializable {
 	 * @return 項目小数点以下桁数
 	 */
 	public int getDecimal() {
-		return decimal;
+		if (StringUtils.isNumeric(decimalText)) {
+			return Integer.parseInt(decimalText);
+		} else {
+			return 0;
+		}
 	}
 
 	/**
 	 * 項目小数点以下桁数 を設定する
 	 *
-	 * @param decimal 項目小数点以下桁数
+	 * @param decimalText 項目小数点以下桁数
 	 */
-	public void setDecimal(int decimal) {
-		this.decimal = decimal;
+	public void setDecimal(String decimalText) {
+		this.decimalText = decimalText;
 	}
 
 	/**
@@ -137,17 +148,17 @@ public class FieldInfo implements Serializable {
 	 *
 	 * @return 項目はNULL可能か
 	 */
-	public Boolean getNullable() {
-		return nullable;
+	public Boolean isNullable() {
+		return StringUtils.isBlank(nullableText);
 	}
 
 	/**
 	 * 項目はNULL可能か を設定する
 	 *
-	 * @param nullable 項目はNULL可能か
+	 * @param nullableText 項目はNULL可能か
 	 */
-	public void setNullable(Boolean nullable) {
-		this.nullable = nullable;
+	public void setNullable(String nullableText) {
+		this.nullableText = nullableText;
 	}
 
 	/**
@@ -155,17 +166,17 @@ public class FieldInfo implements Serializable {
 	 *
 	 * @return 項目は主キーの一部か
 	 */
-	public Boolean getPk() {
-		return pk;
+	public Boolean isPk() {
+		return StringUtils.isBlank(pkText);
 	}
 
 	/**
 	 * 項目は主キーの一部か を設定する
 	 *
-	 * @param pk 項目は主キーの一部か
+	 * @param pkText 項目は主キーの一部か
 	 */
-	public void setPk(Boolean pk) {
-		this.pk = pk;
+	public void setPk(String pkText) {
+		this.pkText = pkText;
 	}
 
 	/**
@@ -182,8 +193,10 @@ public class FieldInfo implements Serializable {
 	 *
 	 * @param indexNo 項目はインデックス対象の場合インデックス番号リスト
 	 */
-	public void setIndexNo(List<String> indexNo) {
-		this.indexNo = indexNo;
+	public void setIndex(String indexText) {
+		index++;
+		if (StringUtils.isNotBlank(indexText)) {
+			indexNo.add(String.valueOf(index));
+		}
 	}
-	
 }
