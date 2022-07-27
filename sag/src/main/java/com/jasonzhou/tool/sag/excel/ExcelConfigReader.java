@@ -3,6 +3,7 @@
  */
 package com.jasonzhou.tool.sag.excel;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,13 +35,14 @@ import com.jasonzhou.tool.sag.util.SagUtil;
  * @author Jason Zhou
  *
  */
-public class ExcelConfigReader<C extends Config> extends ConfigReader<C>  {
+public class ExcelConfigReader<C extends Config> extends ConfigReader<C> implements Closeable {
 
     private static Logger logger = LoggerFactory.getLogger(ExcelConfigReader.class);
 	/** シート：設定情報（グローバル変数） */
 	private static final String SHEET_CONFIG = "config";
 	private static final int GLOBAL_START_ROW = 1;
 	private static final int GLOBAL_START_COL = 1;
+	private Map<String, List<CellRangeAddress>> mapRangeAddress = new HashMap<>();
 
 	/**
 	 * 設定情報：属性　定義対象シート
@@ -58,7 +61,7 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C>  {
 			Sheet propertySheet = book.getSheet(SHEET_CONFIG);
 			loadProperties(propertySheet, config);
 			//対象シート
-			for (String sheetName : StringUtils.split(config.getProperty(PROPERTY_DEFINE_SHEETS), ",")) {
+			for (String sheetName : SagUtil.split(config.getProperty(PROPERTY_DEFINE_SHEETS), ",")) {
 				sheetName = StringUtils.trim(sheetName);
 				Sheet sheet = book.getSheet(sheetName);
 				if (sheet == null) {
@@ -104,6 +107,42 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C>  {
 	}
 	
 	/**
+	 * シートの併合されたエリアを取得する
+	 * 
+	 * @param sheet	シート
+	 * @return　併合されたエリアリスト
+	 */
+	private List<CellRangeAddress> getCellRangions(Sheet sheet) {
+		String key = sheet.getSheetName();
+		if (mapRangeAddress.containsKey(key)) {
+			return mapRangeAddress.get(key);
+		} else {
+			List<CellRangeAddress> list = sheet.getMergedRegions();
+			if (list == null) {
+				list = new ArrayList<>();
+			}
+			mapRangeAddress.put(key, list);
+			return list;
+		}
+	}
+	
+	private boolean inMergedRangion(Sheet sheet, int rowNo, int colNo) {
+		List<CellRangeAddress> list = getCellRangions(sheet);
+		for (CellRangeAddress cra : list) {
+			if (rowNo < cra.getFirstRow() || rowNo > cra.getLastRow()
+				|| colNo < cra.getFirstColumn() || colNo > cra.getLastColumn()) {
+				
+			} else {
+				if (rowNo >= cra.getFirstRow() && rowNo <= cra.getLastRow()
+						&& colNo >= cra.getFirstColumn() || colNo >= cra.getLastColumn()) {
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
 	 * シートから属性値を読込んで、対象のインスタンスに設定する
 	 * 
 	 * @param <T>		対象クラス
@@ -114,6 +153,7 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C>  {
 	 * @throws Exception
 	 */
 	private <T> T read(Sheet sheet, Config config, Class<T> tClass) throws Exception {
+		
 		T t = tClass.getDeclaredConstructor().newInstance();
 		//単純な属性
 		if (tClass.isAssignableFrom(SimpleProperty.class)) {
@@ -238,7 +278,13 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C>  {
 		return list;
 	}
 	CheckVarType checkSimple = (cell) -> { return !StringUtils.startsWith(ExcelUtils.getCellComment(cell), ":"); }; 
-	CheckVarType checkList = (cell) -> { return StringUtils.startsWith(ExcelUtils.getCellComment(cell), ":"); }; 
+	CheckVarType checkList = (cell) -> { return StringUtils.startsWith(ExcelUtils.getCellComment(cell), ":"); };
+
+	@Override
+	public void close() throws IOException {
+		mapRangeAddress.clear();
+		
+	} 
 }
 
 

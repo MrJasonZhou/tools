@@ -10,7 +10,7 @@ package com.jasonzhou.tool.sag.config;
 public class Task {
 
 	/** テンプレートファイル名 */
-	private String templateFileName;
+	private String templateFile;
 	
 	/** スイッチ関数式 */
 	private String switchExpress;
@@ -24,7 +24,7 @@ public class Task {
 	 * @return テンプレートファイル名
 	 */
 	public String getTemplateFileName() {
-		return templateFileName;
+		return templateFile;
 	}
 
 	/**
@@ -33,7 +33,7 @@ public class Task {
 	 * @param templateFileName テンプレートファイル名
 	 */
 	public void setTemplateFileName(String templateFileName) {
-		this.templateFileName = templateFileName;
+		this.templateFile = templateFileName;
 	}
 
 	/**
