@@ -42,7 +42,6 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 	private static final String SHEET_CONFIG = "config";
 	private static final int GLOBAL_START_ROW = 1;
 	private static final int GLOBAL_START_COL = 1;
-	private Map<String, List<CellRangeAddress>> mapRangeAddress = new HashMap<>();
 
 	/**
 	 * 設定情報：属性　定義対象シート
@@ -104,42 +103,6 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 			config.setProperty(name, value);
 			rowNo++;
 		}
-	}
-	
-	/**
-	 * シートの併合されたエリアを取得する
-	 * 
-	 * @param sheet	シート
-	 * @return　併合されたエリアリスト
-	 */
-	private List<CellRangeAddress> getCellRangions(Sheet sheet) {
-		String key = sheet.getSheetName();
-		if (mapRangeAddress.containsKey(key)) {
-			return mapRangeAddress.get(key);
-		} else {
-			List<CellRangeAddress> list = sheet.getMergedRegions();
-			if (list == null) {
-				list = new ArrayList<>();
-			}
-			mapRangeAddress.put(key, list);
-			return list;
-		}
-	}
-	
-	private boolean inMergedRangion(Sheet sheet, int rowNo, int colNo) {
-		List<CellRangeAddress> list = getCellRangions(sheet);
-		for (CellRangeAddress cra : list) {
-			if (rowNo < cra.getFirstRow() || rowNo > cra.getLastRow()
-				|| colNo < cra.getFirstColumn() || colNo > cra.getLastColumn()) {
-				
-			} else {
-				if (rowNo >= cra.getFirstRow() && rowNo <= cra.getLastRow()
-						&& colNo >= cra.getFirstColumn() || colNo >= cra.getLastColumn()) {
-				}
-			}
-		}
-		
-		return false;
 	}
 	
 	/**
@@ -275,7 +238,6 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 
 	@Override
 	public void close() throws IOException {
-		mapRangeAddress.clear();
 		
 	} 
 }
