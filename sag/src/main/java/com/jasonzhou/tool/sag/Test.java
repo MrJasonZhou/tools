@@ -44,9 +44,9 @@ public class Test {
 		for (int rowNo = sheet.getFirstRowNum(); rowNo < sheet.getLastRowNum(); rowNo++) {
 			Row row = sheet.getRow(rowNo);
 			for (short colNo = row.getFirstCellNum(); colNo < row.getLastCellNum(); colNo++) {
-				String text = ExcelUtils.getCellText(row, colNo);
+				String text = ExcelUtils.getCellText(sheet, rowNo, colNo);
 				String comment = ExcelUtils.getCellComment(sheet, rowNo, colNo);
-				System.out.println("cell[" + rowNo + ", " + colNo + "] text=" + text + ", comment =" + comment );
+				System.out.println("cell[" + rowNo + ", " + colNo + "] text=[" + text + "], comment =[" + comment + "]");
 			}
 			System.out.println("--------------------------------------------------");
 		}
@@ -59,7 +59,7 @@ public class Test {
 	public static void main(String[] args) throws Exception {
 		Test test = new Test();
 		InputStream is = test.getClass().getResourceAsStream("/sagConfig.xlsm");
-		test.testMergeRangion(is);
+		test.testLoadExcel(is);
 	}
 
 }

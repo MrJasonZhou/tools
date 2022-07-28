@@ -12,7 +12,7 @@ import java.util.List;
  * @author Jason Zhou
  *
  */
-public interface ListableProperty<T> extends Serializable, SimpleProperty {
+public interface ListableProperty<T> extends Serializable {
 
 	/**
 	 * 属性を追加する

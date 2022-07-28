@@ -23,17 +23,17 @@ public class Task {
 	
 	 * @return テンプレートファイル名
 	 */
-	public String getTemplateFileName() {
+	public String getTemplateFile() {
 		return templateFile;
 	}
 
 	/**
 	 * テンプレートファイル名 を設定する
 	 *
-	 * @param templateFileName テンプレートファイル名
+	 * @param templateFile テンプレートファイル名
 	 */
-	public void setTemplateFileName(String templateFileName) {
-		this.templateFile = templateFileName;
+	public void setTemplateFile(String templateFile) {
+		this.templateFile = templateFile;
 	}
 
 	/**

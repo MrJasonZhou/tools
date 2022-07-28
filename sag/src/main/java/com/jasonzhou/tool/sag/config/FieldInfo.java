@@ -21,6 +21,9 @@ public class FieldInfo implements Serializable {
 	/**  */
 	private static final long serialVersionUID = 1695007824542641409L;
 
+	/** 項目番号 */
+	private String no;
+	
 	/** 項目名 */
 	private String name;
 	
@@ -44,6 +47,24 @@ public class FieldInfo implements Serializable {
 	
 	/** 項目はインデックス対象の場合インデックス番号リスト */
 	private List<String> indexNo = new ArrayList<>();
+
+	/**
+	 * 項目番号 を取得する
+	 *
+	 * @return 項目番号
+	 */
+	public String getNo() {
+		return no;
+	}
+
+	/**
+	 * 項目番号 を設定する
+	 *
+	 * @param no 項目番号
+	 */
+	public void setNo(String no) {
+		this.no = no;
+	}
 
 	/**
 	 * 項目名 を取得する
@@ -104,11 +125,11 @@ public class FieldInfo implements Serializable {
 	 *
 	 * @return 項目レングス
 	 */
-	public int getLength() {
+	public String getLength() {
 		if (StringUtils.isNumeric(lengthText)) {
-			return Integer.parseInt(lengthText);
+			return lengthText;
 		} else {
-			return 0;
+			return "0";
 		}
 	}
 
@@ -126,11 +147,11 @@ public class FieldInfo implements Serializable {
 	 *
 	 * @return 項目小数点以下桁数
 	 */
-	public int getDecimal() {
+	public String getDecimal() {
 		if (StringUtils.isNumeric(decimalText)) {
-			return Integer.parseInt(decimalText);
+			return decimalText;
 		} else {
-			return 0;
+			return "0";
 		}
 	}
 

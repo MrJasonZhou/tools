@@ -62,19 +62,19 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 			loadProperties(propertySheet, config);
 			//対象シート
 			for (String sheetName : SagUtil.split(config.getProperty(PROPERTY_DEFINE_SHEETS), ",")) {
-				sheetName = StringUtils.trim(sheetName);
-				Sheet sheet = book.getSheet(sheetName);
+				String propertyName = StringUtils.trim(sheetName);
+				Sheet sheet = book.getSheet(propertyName);
 				if (sheet == null) {
-					String msg = "シートを見つかりませんでした。シート名＝" + sheetName;
+					String msg = "シートを見つかりませんでした。シート名＝" + propertyName;
 					logger.error(msg);
 					throw new IOException(msg);
 				}
-				String clsName = config.getProperty(sheetName + ".class");
+				String clsName = config.getProperty(propertyName + ".class");
 				if (StringUtils.isNotBlank(clsName)) {
 					try {
 						Class<?> cls = Class.forName(clsName);
-						Object define=read(sheet, config, cls);
-						SagUtil.set(config, sheetName, define);
+						Object property=read(sheet, config, cls);
+						SagUtil.set(config, propertyName, property);
 						//config.setDefine(sheetName, define);
 					}catch (Exception e) {
 						logger.error("クラスロード中エラーが発生しました。クラス名＝" + clsName, e);
@@ -156,13 +156,13 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 		
 		T t = tClass.getDeclaredConstructor().newInstance();
 		//単純な属性
-		if (tClass.isAssignableFrom(SimpleProperty.class)) {
+		if (SimpleProperty.class.isAssignableFrom(tClass)) {
 			Class<SimpleProperty> cls = (Class<SimpleProperty>) tClass;
 			SimpleProperty s = (SimpleProperty) t;
 			readSimple(sheet, config, s);
 		}
 		//リスト属性
-		if (tClass.isAssignableFrom(ListableProperty.class)) {
+		if (ListableProperty.class.isAssignableFrom(tClass)) {
 			Class<ListableProperty<?>> cls = (Class<ListableProperty<?>>)  tClass;
 			ListableProperty<?> l = (ListableProperty<?>) t;
 			readList(sheet, config, l);
@@ -174,7 +174,7 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 	}
 
 	private IExcelRowChecker defaultRowCheck = (config, sheet, rowNo,vdList) -> {
-		return StringUtils.isBlank(ExcelUtils.getCellText(sheet, rowNo, vdList.get(0).getPosistion().getCol()));
+		return StringUtils.isNotBlank(ExcelUtils.getCellText(sheet, rowNo, vdList.get(0).getPosistion().getCol()));
 	};
 	
 	
@@ -208,22 +208,13 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 			return t;
 		}
 		varMap.put(sheet.getSheetName() + ":simple", vdList);
-		//行番号
-		int rowNo = vdList.get(0).getPosistion().getRow() + 1;
-		//行は処理対象であるかを判断するチェッカーを取得する
-		IExcelRowChecker rowChecker = getRowChecker(config, sheet);
-		
-		//行は対象であるかを判断する
-		while(rowChecker.check(config, sheet, rowNo, vdList)) {
-			for(VarDefine vd : vdList) {
-				String propertyName = vd.getVarName();
-				String text = ExcelUtils.getCellText(sheet, rowNo, vd.getPosistion().getCol());
-				if (StringUtils.isNotBlank(propertyName)) {
-					//値を設定する
-					SagUtil.set(t, propertyName, text);
-				}
+		for(VarDefine vd : vdList) {
+			String propertyName = vd.getVarName();
+			String text = ExcelUtils.getCellText(sheet, vd.getPosistion().getRow(), vd.getPosistion().getCol());
+			if (StringUtils.isNotBlank(propertyName)) {
+				//値を設定する
+				SagUtil.set(t, propertyName, text);
 			}
-			rowNo++;
 		}
 		return t;
 	}
@@ -236,7 +227,7 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 		}
 		varMap.put(sheet.getSheetName() + ":list", vdList);
 		//行番号
-		int rowNo = vdList.get(0).getPosistion().getRow() + 1;
+		int rowNo = vdList.get(0).getPosistion().getRow();
 		//行は処理対象であるかを判断するチェッカーを取得する
 		IExcelRowChecker rowChecker = getRowChecker(config, sheet);
 		//行は対象であるかを判断する
@@ -261,15 +252,17 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 	
 	private List<VarDefine> parseLayout(Sheet sheet, CheckVarType check) {
 		List<VarDefine> list = new ArrayList<>();
-		for (int rowNo = sheet.getFirstRowNum(); rowNo <= sheet.getLastRowNum(); rowNo++) {
+		for (int rowNo = sheet.getFirstRowNum(); rowNo < sheet.getLastRowNum(); rowNo++) {
 			Row row = sheet.getRow(rowNo);
 			if (row != null) {
-				for (int colNo = row.getFirstCellNum(); colNo <= row.getLastCellNum(); colNo++) {
-					Cell cell = row.getCell(colNo);
+				for (int colNo = row.getFirstCellNum(); colNo < row.getLastCellNum(); colNo++) {
+					Cell cell = ExcelUtils.getCell(sheet, rowNo, colNo);
 					if (cell != null) {
 						if (check.check(cell)) {
 							Position pos = new Position(rowNo, colNo);
-							VarDefine vd = VarDefine.create(pos, ExcelUtils.getCellText(cell));
+							String varName = StringUtils.trim(ExcelUtils.getCellComment(cell));
+							VarDefine vd = VarDefine.create(pos, varName);
+							list.add(vd);
 						}
 					}
 				}
@@ -277,7 +270,7 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 		}
 		return list;
 	}
-	CheckVarType checkSimple = (cell) -> { return !StringUtils.startsWith(ExcelUtils.getCellComment(cell), ":"); }; 
+	CheckVarType checkSimple = (cell) -> { String comment = ExcelUtils.getCellComment(cell); return  StringUtils.isNotBlank(comment) && !StringUtils.startsWith(comment, ":"); }; 
 	CheckVarType checkList = (cell) -> { return StringUtils.startsWith(ExcelUtils.getCellComment(cell), ":"); };
 
 	@Override

@@ -18,9 +18,6 @@ public class VarDefine {
 	/** 変数型 */
 	private VarType type;
 	
-	/** 変数区分 */
-	private VarKbn kbn;
-	
 	/** 必須フラグ */
 	private boolean required = false;
 	
@@ -83,24 +80,6 @@ public class VarDefine {
 	}
 
 	/**
-	 * 変数区分 を取得する
-	
-	 * @return 変数区分
-	 */
-	public VarKbn getKbn() {
-		return kbn;
-	}
-
-	/**
-	 * 変数区分 を設定する
-	 *
-	 * @param kbn 変数区分
-	 */
-	public void setKbn(VarKbn kbn) {
-		this.kbn = kbn;
-	}
-
-	/**
 	 * 必須フラグ を取得する
 	
 	 * @return 必須フラグ
@@ -126,6 +105,6 @@ public class VarDefine {
 	
 	@Override
 	public String toString() {
-		return "VarDefine:[pos=(kbn=" + getKbn() + ", "+posistion.getRow() + "," + posistion.getCol() +"), name=" + getVarName() + "]";
+		return "VarDefine:[pos=("+posistion.getRow() + "," + posistion.getCol() +"), name=" + getVarName() + "]";
 	}
 }

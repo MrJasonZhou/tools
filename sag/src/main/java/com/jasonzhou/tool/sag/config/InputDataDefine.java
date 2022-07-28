@@ -29,17 +29,17 @@ public class InputDataDefine {
 	 * @param define	変数定義
 	 */
 	public void registe(VarDefine define) {
-		switch(define.getKbn()) {
-		case GLOBAL :
-			globalMap.put(define.getVarName(), define);
-			break;
-		case LOOP:
-			loopMap.put(define.getVarName(), define);
-			loopStartRowNo = define.getPosistion().getRow();
-			break;
-		default:
-			break;
-		}
+//		switch(define.getKbn()) {
+//		case GLOBAL :
+//			globalMap.put(define.getVarName(), define);
+//			break;
+//		case LOOP:
+//			loopMap.put(define.getVarName(), define);
+//			loopStartRowNo = define.getPosistion().getRow();
+//			break;
+//		default:
+//			break;
+//		}
 	}
 
 	/**

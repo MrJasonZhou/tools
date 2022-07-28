@@ -111,7 +111,18 @@ public class ExcelUtils {
 			}
 		}
 		return null;
-		
+	}
+
+	/**
+	 * 指定行と列のセルを取得する（結合された場合、最初のセル以外、nullを返す）
+	 * 
+	 * @param sheet	シート
+	 * @param rowNo	指定行
+	 * @param colNo	指定列
+	 * @return	セル情報
+	 */
+	public static Cell getCell(Sheet sheet, int rowNo, int colNo) {
+		return getCell(sheet, rowNo, colNo, false);
 	}
 	
 	/**
@@ -321,7 +332,7 @@ public class ExcelUtils {
 	 * @param colNo	列番号
 	 * @return	セルのテキスト情報
 	 */
-	public static String getCellText(Row row, int colNo) {
+	private static String getCellText(Row row, int colNo) {
 		if (colNo > row.getLastCellNum()) {
 			return "";
 		}

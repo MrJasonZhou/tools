@@ -1,6 +1,7 @@
 package com.jasonzhou.tool.sag.util;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.beanutils.MethodUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -126,6 +128,38 @@ public class SagUtil {
 	}
 	
 	/**
+	 * 属性の設定メソッドを取得する
+	 * 
+	 * @param clz		対象クラス
+	 * @param property	属性名
+	 * @param value		属性値
+	 * @return	設定メソッド
+	 */
+	private static Method getSetMethod(Class<?> clz, String property, Object value) {
+		String methodName = "set" + StringUtils.capitalize(property);
+		List<Method> list = new ArrayList<>();
+		for (Method method : clz.getDeclaredMethods()) {
+			//メソッド名同じ
+			if (StringUtils.equals(methodName, method.getName()) && method.getParameterCount() == 1) {
+				list.add(method);
+			}
+		}
+		if (list.size() == 0) {
+			return null;
+		}
+		if (list.size() == 1) {
+			return list.get(0);
+		}
+		for (Method method : list) {
+			Class<?> pClass = method.getParameterTypes()[0];
+			if (pClass.isAssignableFrom(value.getClass())) {
+				return method;
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * 単一属性を設定する
 	 * 
 	 * @param bean	ビーン
@@ -136,8 +170,11 @@ public class SagUtil {
 	private static void setSingle(Object bean, String property, Object value) throws Exception {
 		try {
 			PropertyDescriptor pd = PropertyUtils.getPropertyDescriptor(bean, property);
-			Object castValue = cast(value, pd.getPropertyType());
-			PropertyUtils.setNestedProperty(bean, property, castValue);
+			//Object castValue = cast(value, pd.getPropertyType());
+			Method setMethod = getSetMethod(bean.getClass(), property, value);
+			if (setMethod != null) {
+				setMethod.invoke(bean, value);
+			}
 		} catch (Exception e) {
 			logger.warn("値設定時エラーが発生しました。bean=" + bean + ", 属性＝" + property + ", value=" + value, e);
 			throw e;
@@ -157,9 +194,11 @@ public class SagUtil {
 			String s = (String) value;
 			switch(cls.getName()) {
 			case "java.lang.Integer":
+			case "int":
 				result = Integer.parseInt(s);
 				break;
 			case "java.lang.Long":
+			case "long":
 				result = Long.parseLong(s);
 				break;
 			case "java.math.BigDecimal":
