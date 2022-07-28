@@ -56,16 +56,19 @@ public class ExcelUtils {
 	 * @param sheet	シート
 	 */
 	private static void loadCellRange(Sheet sheet) {
-		if (mapRange.containsKey(sheet)) {
-			return ;
+		synchronized (sheet) {
+			if (mapRange.containsKey(sheet)) {
+				return ;
+			}
+			List<CellRangeAddress > list = new ArrayList<>();
+			int numMergedRegions = sheet.getNumMergedRegions();
+			for (int i = 0; i < numMergedRegions; i++) {
+				CellRangeAddress range = sheet.getMergedRegion(i);
+				list.add(range);
+			}
+			mapRange.put(sheet, list);
 		}
-		List<CellRangeAddress > list = new ArrayList<>();
-		int numMergedRegions = sheet.getNumMergedRegions();
-		for (int i = 0; i < numMergedRegions; i++) {
-			CellRangeAddress range = sheet.getMergedRegion(i);
-			list.add(range);
-		}
-		mapRange.put(sheet, list);
+		
 	}
 	
 	/**
@@ -90,21 +93,45 @@ public class ExcelUtils {
 	}
 	
 	/**
+	 * 指定された位置の結合範囲を取得する
+	 * 
+	 * @param sheet	シート
+	 * @param rowNo	行番号
+	 * @param colNo　列番号
+	 * @return　結合された場合、結合範囲を返す。結合されていない場合、nullを返す
+	 */
+	private static CellRangeAddress getCellRange(Sheet sheet, int rowNo, int colNo) {
+		loadCellRange(sheet);
+		for (CellRangeAddress range : mapRange.get(sheet)) {
+			if (rowNo >= range.getFirstRow() 
+					&& rowNo <= range.getLastRow() 
+					&& colNo >= range.getFirstColumn() 
+					&& colNo <= range.getLastColumn()) {
+				return range;
+			}
+		}
+		return null;
+		
+	}
+	
+	/**
 	 * 指定行と列のセルを取得する
 	 * 
 	 * @param sheet	シート
 	 * @param rowNo	指定行
 	 * @param colNo	指定列
+	 * @param asFirstCell 結合された場合、結合エリアの最初のセルを返す 
 	 * @return	セル情報
 	 */
-	public static Cell getCell(Sheet sheet, int rowNo, int colNo) {
-		if (!mapRange.containsKey(sheet)) {
-			loadCellRange(sheet);
-		}
-		for (CellRangeAddress range : mapRange.get(sheet)) {
-			if (rowNo >= range.getFirstRow() && rowNo <= range.getLastRow() && colNo >= range.getFirstColumn() && colNo <= range.getLastColumn()) {
-				return sheet.getRow(range.getFirstRow()).getCell(range.getFirstColumn());
-			}
+	public static Cell getCell(Sheet sheet, int rowNo, int colNo, boolean asFirstCell) {
+		CellRangeAddress range = getCellRange(sheet, rowNo, colNo);
+		if (range != null) {
+			//最初のセル以外
+			if (!asFirstCell && (rowNo != range.getFirstRow() || colNo != range.getFirstColumn())) {
+				return null;
+			}  
+			rowNo = range.getFirstRow();
+			colNo = range.getFirstColumn();
 		}
 		Row row = sheet.getRow(rowNo);
 		if (row == null) {
@@ -246,7 +273,10 @@ public class ExcelUtils {
 	 * @return	コメント情報
 	 */
 	public static String getCellComment(Sheet sheet, int rowNo, int colNo) {
-		Cell cell = getCell(sheet, rowNo, colNo);
+		Cell cell = getCell(sheet, rowNo, colNo, false);
+		if (cell == null) {
+			return "";
+		}
 		return getCellComment(cell);
 	}
 
@@ -307,10 +337,8 @@ public class ExcelUtils {
 	 * @return	セルのテキスト情報
 	 */
 	public static String getCellText(Sheet sheet, int rowNo, int colNo) {
-		if (rowNo < sheet.getFirstRowNum() || rowNo > sheet.getLastRowNum()) {
-			return "";
-		}
-		return getCellText(sheet.getRow(rowNo), colNo);
+		Cell cell = getCell(sheet, rowNo, colNo, false);
+		return getCellText(cell);
 	}
 	
 	/**
@@ -389,7 +417,11 @@ public class ExcelUtils {
 	 * @param cellFormat セルフォーマット
 	 */
 	public static void formatCell(Sheet sheet, int rowNo, int colNo, CellFormatter... cellFormat) {
-		Cell cell = getCell(sheet, rowNo, colNo);
+		Cell cell = getCell(sheet, rowNo, colNo, false);
+		//結合されたセル処理を飛ばす
+		if (cell == null) {
+			return;
+		}
 		CellStyle style = getCellStyle(sheet.getWorkbook(), cellFormat);
 		cell.setCellStyle(style);
 	}
