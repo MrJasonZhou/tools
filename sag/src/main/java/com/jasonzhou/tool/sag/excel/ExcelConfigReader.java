@@ -53,7 +53,7 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 	@Override
 	public C load(InputStream is, Class<C> cClass) throws Exception {
 		Workbook book = null;
-		C config = cClass.getDeclaredConstructor().newInstance();
+		C config = SagUtil.newInstance(cClass);
 		try {
 			book = ExcelUtils.load(is);
 			//最初の
@@ -117,7 +117,7 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 	 */
 	private <T> T read(Sheet sheet, Config config, Class<T> tClass) throws Exception {
 		
-		T t = tClass.getDeclaredConstructor().newInstance();
+		T t = SagUtil.newInstance(tClass);
 		//単純な属性
 		if (SimpleProperty.class.isAssignableFrom(tClass)) {
 			Class<SimpleProperty> cls = (Class<SimpleProperty>) tClass;
@@ -156,7 +156,7 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 		} else {
 			try {
 				Class<IExcelRowChecker> clz = (Class<IExcelRowChecker>)Class.forName(checkerClassName);
-				rowChecker = clz.getDeclaredConstructor().newInstance();
+				rowChecker = SagUtil.newInstance(clz);
 			}catch(Exception e) {
 				logger.warn("RowCheckeロード時エラーが発生しました。", e);
 				rowChecker = defaultRowCheck;

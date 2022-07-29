@@ -1,6 +1,7 @@
 package com.jasonzhou.tool.sag.util;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -676,6 +677,23 @@ public class SagUtil {
     		arr[i] = list.get(i);
     	}
     	return StringUtils.join(arr,del );
+    }
+    
+    /**
+     * 指定されたクラスのインスタンスを生成する
+     * 
+     * @param <T>
+     * @param tClass	指定されたクラス
+     * @return　このクラスのインスタンス
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     */
+    public static <T> T newInstance(Class<T> tClass) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		return tClass.getDeclaredConstructor().newInstance();
     }
 
 }
