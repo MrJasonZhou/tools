@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +51,7 @@ public class ExcelUtils {
 	private static DataFormatter df = new DataFormatter();
 
 	private static Map<String, ValueFormatter> vfMap = new HashMap<>();
+	
 	/**
 	 * シートの結合セル情報を取得し、キャシューさせる
 	 * 
@@ -66,6 +68,8 @@ public class ExcelUtils {
 				CellRangeAddress range = sheet.getMergedRegion(i);
 				list.add(range);
 			}
+			list.sort((a, b) -> 
+				a.getFirstRow()> b.getFirstRow() ? 1 : (a.getFirstRow() == b.getFirstRow() ? Integer.compare(a.getFirstColumn(), b.getFirstColumn()):-1 ) );
 			mapRange.put(sheet, list);
 		}
 		
@@ -108,7 +112,12 @@ public class ExcelUtils {
 					&& colNo >= range.getFirstColumn() 
 					&& colNo <= range.getLastColumn()) {
 				return range;
+			} else {
+				if (rowNo > range.getLastRow() || (rowNo == range.getLastRow() && colNo > range.getLastColumn())) {
+					break;
+				}
 			}
+			
 		}
 		return null;
 	}
