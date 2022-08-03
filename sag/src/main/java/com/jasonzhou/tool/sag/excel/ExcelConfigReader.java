@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.jasonzhou.tool.sag.excel;
 
@@ -16,7 +16,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,13 +30,13 @@ import com.jasonzhou.tool.sag.util.SagUtil;
 
 /**
  * Excelファイルから設定情報を読込む
- * 
+ *
  * @author Jason Zhou
  *
  */
 public class ExcelConfigReader<C extends Config> extends ConfigReader<C> implements Closeable {
 
-    private static Logger logger = LoggerFactory.getLogger(ExcelConfigReader.class);
+	private static Logger logger = LoggerFactory.getLogger(ExcelConfigReader.class);
 	/** シート：設定情報（グローバル変数） */
 	private static final String SHEET_CONFIG = "config";
 	private static final int GLOBAL_START_ROW = 1;
@@ -47,11 +46,27 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 	 * 設定情報：属性　定義対象シート
 	 */
 	private static final String PROPERTY_DEFINE_SHEETS = "define.sheets";
-	
+
 	private Map<String, List<VarDefine>> varMap = new HashMap<>();
-	
+
+	private InputStream inputStream = null;
+
+	/**
+	 * コンストラクタ
+	 *
+	 * @param is 入力ストリーム
+	 */
+	public ExcelConfigReader(InputStream is ) {
+		inputStream = is;
+
+	}
+
 	@Override
-	public C load(InputStream is, Class<C> cClass) throws Exception {
+	public C load(Class<C> cClass) throws Exception {
+		return load(inputStream, cClass);
+	}
+
+	private C load(InputStream is, Class<C> cClass) throws Exception {
 		Workbook book = null;
 		C config = SagUtil.newInstance(cClass);
 		try {
@@ -90,7 +105,7 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 
 	/**
 	 * 設定情報（属性）を取得する
-	 * 
+	 *
 	 * @param sheet	ワークシート
 	 * @param config 設定情報
 	 */
@@ -104,10 +119,10 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 			rowNo++;
 		}
 	}
-	
+
 	/**
 	 * シートから属性値を読込んで、対象のインスタンスに設定する
-	 * 
+	 *
 	 * @param <T>		対象クラス
 	 * @param sheet		シート
 	 * @param config	設定情報
@@ -116,7 +131,7 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 	 * @throws Exception
 	 */
 	private <T> T read(Sheet sheet, Config config, Class<T> tClass) throws Exception {
-		
+
 		T t = SagUtil.newInstance(tClass);
 		//単純な属性
 		if (SimpleProperty.class.isAssignableFrom(tClass)) {
@@ -130,20 +145,20 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 			ListableProperty<?> l = (ListableProperty<?>) t;
 			readList(sheet, config, l);
 		}
-		
-			
-		
+
+
+
 		return t;
 	}
 
 	private IExcelRowChecker defaultRowCheck = (config, sheet, rowNo,vdList) -> {
 		return StringUtils.isNotBlank(ExcelUtils.getCellText(sheet, rowNo, vdList.get(0).getPosistion().getCol()));
 	};
-	
-	
+
+
 	/**
 	 * 行は処理対象であるかを判断するチェッカーを取得する
-	 * 
+	 *
 	 * @param config	設定情報
 	 * @param sheet		対象となるシート
 	 * @return	行は処理対象であるかを判断するチェッカー
@@ -206,13 +221,13 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 					SagUtil.set(bean, propertyName, text);
 				}
 			}
-			
+
 			t.add((E)bean);
 			rowNo++;
 		}
 		return t;
 	}
-	
+
 	private List<VarDefine> parseLayout(Sheet sheet, CheckVarType check) {
 		List<VarDefine> list = new ArrayList<>();
 		for (int rowNo = sheet.getFirstRowNum(); rowNo < sheet.getLastRowNum(); rowNo++) {
@@ -233,13 +248,30 @@ public class ExcelConfigReader<C extends Config> extends ConfigReader<C> impleme
 		}
 		return list;
 	}
-	CheckVarType checkSimple = (cell) -> { String comment = ExcelUtils.getCellComment(cell); return  StringUtils.isNotBlank(comment) && !StringUtils.startsWith(comment, ":"); }; 
+
+
+
+	CheckVarType checkSimple = (cell) -> { String comment = ExcelUtils.getCellComment(cell); return  StringUtils.isNotBlank(comment) && !StringUtils.startsWith(comment, ":"); };
 	CheckVarType checkList = (cell) -> { return StringUtils.startsWith(ExcelUtils.getCellComment(cell), ":"); };
 
 	@Override
 	public void close() throws IOException {
-		
-	} 
+
+	}
+
+	/**
+	 * 変数定義情報を取得する
+	 *
+	 * @param name　シート名
+	 * @return　変数定義情報リスト
+	 */
+	public List<VarDefine> getVarDefine(String name) {
+		if (varMap.containsKey(name)) {
+			return varMap.get(name);
+		} else {
+			return new ArrayList<>();
+		}
+	}
 }
 
 

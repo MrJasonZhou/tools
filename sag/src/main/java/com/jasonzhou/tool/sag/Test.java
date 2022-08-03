@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.jasonzhou.tool.sag;
 
@@ -9,7 +9,6 @@ import java.util.Set;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.springframework.core.io.ClassPathResource;
 
 import com.jasonzhou.tool.sag.config.SagConfig;
 import com.jasonzhou.tool.sag.config.SagConfigReader;
@@ -23,21 +22,21 @@ import com.jasonzhou.tool.sag.util.SpringUtil;
  *
  */
 public class Test {
-	
+
 	private <T> void testGetSubClass(Class<T> tClass) {
-		
+
 		Set<Class<? extends T>> set = SpringUtil.getSubTypesOf(tClass);
 		System.out.println(tClass.getCanonicalName() + "のサブクラス：");
 		for (Class<? extends T> clz : set) {
 			System.out.println(clz.getName());
 		}
 	}
-	
+
 	private void testLoadExcel(InputStream is) throws Exception {
-		SagConfigReader reader = new SagConfigReader();
-		SagConfig config = reader.load(is, SagConfig.class);
+		SagConfigReader reader = new SagConfigReader(is);
+		SagConfig config = reader.load(SagConfig.class);
 	}
-	
+
 	private void testMergeRangion(InputStream is) throws Exception {
 		Workbook book = ExcelUtils.load(is);
 		Sheet sheet = book.getSheet("merge");
